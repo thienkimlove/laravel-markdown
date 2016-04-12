@@ -1,20 +1,8 @@
 #!/usr/bin/env bash
-
-echo "Start setup..."
-
-cp .env.stage .env
-read -p "Your MySQL Host : "  mysql_host
-read -p "Your MySQL Database : "  mysql_db
-read  -p "Your MySQL Username : " mysql_user
-read -p "Your MySQL Password : " mysql_pass
-
-sed -i -e "s/localhost/$mysql_host/g" .env
-sed -i -e "s/homestead/$mysql_db/g" .env
-sed -i -e "s/root/$mysql_user/g" .env
-sed -i -e "s/secret/$mysql_pass/g" .env
-
-mysql -u$mysql_user -p$mysql_pass -h$mysql_host -e "GRANT USAGE ON *.* TO '$mysql_db'@'localhost' IDENTIFIED BY '$mysql_user' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;CREATE DATABASE IF NOT EXISTS $mysql_db;GRANT ALL PRIVILEGES ON $mysql_db.* TO '$mysql_user'@'localhost';"
-
+setup_laravel() {
+cd /var/www/html/$1
+mysql -uroot -ptieungao -e "create database $1;"
+sed -i -e "s/DB_DATABASE=homestead/DB_DATABASE=$1/g" .env
 composer install
 
 php artisan key:generate
@@ -24,7 +12,11 @@ php artisan ide-helper:generate
 chmod -R 777 storage
 chmod -R 777 bootstrap
 
+cd /var/www/html/$1
+}
 
+setup_editor() {
+cd /var/www/html/$1
 [ -d public/upload ] || mkdir public/upload
 [ -d public/files ] || mkdir public/files
 chmod -R 777 public/upload
@@ -61,6 +53,18 @@ CKEDITOR.editorConfig = function( config ) {
 	config.extraPlugins = 'pbckcode';
 };
 endmsg
+cd /var/www/html/$1
+}
+
+echo "Start setup..."
+
+cp .env.stage .env
+read -p "Your project : "  project
+setup_laravel $project
+setup_editor $project
+
+
+
 
 
 
