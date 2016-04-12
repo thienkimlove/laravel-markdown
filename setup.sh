@@ -11,7 +11,8 @@ php artisan ide-helper:generate
 
 chmod -R 777 storage
 chmod -R 777 bootstrap
-
+php artisan vendor:publish --provider="Intervention\Image\ImageServiceProviderLaravel5"
+php artisan vendor:publish
 cd /var/www/html/$1
 }
 
